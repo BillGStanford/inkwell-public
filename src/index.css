@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+
+body {
+  @apply bg-gray-50 text-gray-900;
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-serif;
+}
+
+.input-field {
+  @apply w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
+}
+
+.btn {
+  @apply px-4 py-2 rounded font-medium focus:outline-none focus:ring-2 focus:ring-opacity-50 transition duration-200;
+}
+
+.btn-primary {
+  @apply bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500;
+}
+
+.btn-secondary {
+  @apply bg-secondary-600 hover:bg-secondary-700 text-white focus:ring-secondary-500;
+}
+
+/* Add this to your global CSS or as a style tag */
+.prose-invert {
+  --tw-prose-body: theme('colors.gray.200');
+  --tw-prose-headings: theme('colors.white');
+  --tw-prose-lead: theme('colors.gray.300');
+  --tw-prose-links: theme('colors.white');
+  --tw-prose-bold: theme('colors.white');
+  --tw-prose-counters: theme('colors.gray.400');
+  --tw-prose-bullets: theme('colors.gray.600');
+  --tw-prose-hr: theme('colors.gray.700');
+  --tw-prose-quotes: theme('colors.gray.300');
+  --tw-prose-quote-borders: theme('colors.gray.700');
+  --tw-prose-captions: theme('colors.gray.500');
+  --tw-prose-code: theme('colors.white');
+  --tw-prose-pre-code: theme('colors.gray.300');
+  --tw-prose-pre-bg: rgb(0 0 0 / 50%);
+  --tw-prose-th-borders: theme('colors.gray.600');
+  --tw-prose-td-borders: theme('colors.gray.700');
+}
+
+.dark .prose-invert {
+  --tw-prose-body: theme('colors.gray.300');
+}
+
+.night .prose-invert {
+  --tw-prose-body: theme('colors.gray.200');
+}
+
+/* If using regular CSS */
+.prose blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.dark .prose blockquote {
+  color: #d1d5db;
+}
+
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.prose p.text-center {
+  text-align: center;
+}
+
+.prose p.text-right {
+  text-align: right;
+}
+
+.prose p.text-justify {
+  text-align: justify;
+}
+
+/* Prose styling for editor content */
+.prose {
+  max-width: 100%;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.prose table td, 
+.prose table th {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+}
+
+/* Dark mode styles */
+.dark .prose {
+  color: #e5e7eb;
+}
+
+.my-custom-table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.my-custom-table td, 
+.my-custom-table th {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+}
+
+/* Dark mode table styles */
+.dark .my-custom-table td,
+.dark .my-custom-table th {
+  border-color: #4b5563;
+}
+
+/* Table styles */
+table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+table td, 
+table th {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  min-width: 100px;
+}
+
+/* Dark mode table styles */
+.dark table td,
+.dark table th {
+  border-color: #4b5563;
+}
+
+/* Table resizing handles */
+.tableWrapper {
+  position: relative;
+  overflow-x: auto;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #adf;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.resize-handle:hover,
+.resize-handle.active {
+  opacity: 1;
+}
