@@ -120,12 +120,12 @@ const BookmarkCard = ({ bookmark, onRemove }) => {
   );
 };
 
-// Tab button component
-const TabButton = ({ active, icon, children, onClick }) => (
+// Tab button component with count badge
+const TabButton = ({ active, icon, children, onClick, count }) => (
   <button
     onClick={onClick}
     className={`
-      flex items-center px-5 py-3 font-medium text-sm transition-all duration-200
+      flex items-center px-5 py-3 font-medium text-sm transition-all duration-200 relative
       ${active ? 
         'border-b-2 border-amber-500 text-amber-800' : 
         'text-amber-600 hover:text-amber-800 hover:bg-amber-50'
@@ -134,6 +134,17 @@ const TabButton = ({ active, icon, children, onClick }) => (
   >
     {icon}
     <span className="ml-2">{children}</span>
+    {count !== undefined && (
+      <span className={`
+        ml-2 px-2 py-0.5 text-xs font-semibold rounded-full min-w-[20px] text-center
+        ${active ? 
+          'bg-amber-500 text-white' : 
+          'bg-amber-200 text-amber-800'
+        }
+      `}>
+        {count}
+      </span>
+    )}
   </button>
 );
 
@@ -184,6 +195,10 @@ const Library = () => {
       setError(err.response?.data?.message || 'Failed to remove bookmark');
     }
   };
+
+  // Calculate counts for each tab
+  const bookCount = bookmarks.filter(b => b.type === 'book').length;
+  const pageCount = bookmarks.filter(b => b.type === 'page').length;
 
   // Filter bookmarks based on type and search term
   const filteredBookmarks = bookmarks.filter(b => {
@@ -293,6 +308,7 @@ const Library = () => {
               active={activeTab === 'books'} 
               icon={<BookOpenIcon className="h-4 w-4" />}
               onClick={() => setActiveTab('books')}
+              count={bookCount}
             >
               Saved Books
             </TabButton>
@@ -300,6 +316,7 @@ const Library = () => {
               active={activeTab === 'pages'} 
               icon={<BookmarkIcon className="h-4 w-4" />}
               onClick={() => setActiveTab('pages')}
+              count={pageCount}
             >
               Saved Pages
             </TabButton>

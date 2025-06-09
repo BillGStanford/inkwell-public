@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Helmet } from 'react-helmet';
 import BookTableOfContents from './BookTableOfContents';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiSun, 
   FiMoon, 
@@ -13,8 +14,11 @@ import {
   FiList, 
   FiBookmark,
   FiSettings,
-  FiX
+  FiX,
+  FiMaximize,
+  FiMinimize,
 } from 'react-icons/fi';
+import { BookmarkIcon, ClockIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 const BookReader = () => {
   const { id } = useParams();
@@ -35,7 +39,7 @@ const BookReader = () => {
   const [bookmarks, setBookmarks] = useState([]);
   const [apiBookmarks, setApiBookmarks] = useState([]);
   const [fontFamily, setFontFamily] = useState('serif');
-  const [lineHeight, setLineHeight] = useState('normal');
+  const [lineHeight, setLineHeight] = useState('relaxed');
   const [isFullscreen, setIsFullscreen] = useState(false);
   
   const pageRefs = useRef([]);
@@ -45,13 +49,13 @@ const BookReader = () => {
     if (!content) return { pages: [], wordCounts: [], total: 0 };
   
     const styledContent = content
-      .replace(/<h1([^>]*)>/g, '<h1$1 class="text-3xl font-bold my-6 pb-2 border-b-2 border-primary-500">')
-      .replace(/<h2([^>]*)>/g, '<h2$1 class="text-2xl font-bold my-5 pb-1 border-b border-primary-300">')
-      .replace(/<h3([^>]*)>/g, '<h3$1 class="text-xl font-semibold my-4">')
-      .replace(/<h4([^>]*)>/g, '<h4$1 class="text-lg font-medium my-3">')
-      .replace(/<h5([^>]*)>/g, '<h5$1 class="font-medium underline my-2">')
-      .replace(/<h6([^>]*)>/g, '<h6$1 class="font-medium italic my-1">')
-      .replace(/<blockquote([^>]*)>/g, '<blockquote$1 class="border-l-4 border-primary-500 pl-4 my-4 italic text-gray-600 dark:text-gray-300">')
+      .replace(/<h1([^>]*)>/g, '<h1$1 class="text-3xl font-serif font-bold my-6 pb-2 border-b-2 border-amber-600">')
+      .replace(/<h2([^>]*)>/g, '<h2$1 class="text-2xl font-serif font-bold my-5 pb-1 border-b border-amber-500">')
+      .replace(/<h3([^>]*)>/g, '<h3$1 class="text-xl font-serif font-semibold my-4">')
+      .replace(/<h4([^>]*)>/g, '<h4$1 class="text-lg font-serif font-medium my-3">')
+      .replace(/<h5([^>]*)>/g, '<h5$1 class="font-serif font-medium underline my-2">')
+      .replace(/<h6([^>]*)>/g, '<h6$1 class="font-serif font-medium italic my-1">')
+      .replace(/<blockquote([^>]*)>/g, '<blockquote$1 class="border-l-4 border-amber-500 pl-4 my-4 italic text-amber-700 dark:text-amber-300">')
       .replace(/<ul([^>]*)>/g, '<ul$1 class="list-disc pl-6 my-4">')
       .replace(/<ol([^>]*)>/g, '<ol$1 class="list-decimal pl-6 my-4">')
       .replace(/<p class="ql-align-center"([^>]*)>/g, '<p$1 class="text-center">')
@@ -316,20 +320,20 @@ const BookReader = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary-500"></div>
+      <div className="flex justify-center items-center h-screen bg-amber-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-amber-600"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-red-500 text-center p-4 bg-red-50 rounded-md border border-red-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-amber-50">
+        <div className="text-amber-800 text-center p-4 bg-amber-100 rounded-sm border-l-4 border-amber-600">
           <p>{error}</p>
           {!user && (
-            <p className="mt-2 text-gray-600">
-              You may need to <Link to="/login" className="text-primary-600 hover:underline">log in</Link> to access this content.
+            <p className="mt-2 text-amber-700">
+              You may need to <Link to="/login" className="text-amber-600 hover:underline">log in</Link> to access this content.
             </p>
           )}
         </div>
@@ -338,12 +342,12 @@ const BookReader = () => {
   }
 
   if (!book) {
-    return <div className="text-center p-8">Book not found</div>;
+    return <div className="text-center p-8 bg-amber-50 text-amber-900">Book not found</div>;
   }
 
   if (!readingStarted) {
     return (
-      <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+      <div className={`min-h-screen ${darkMode ? 'bg-amber-900 text-amber-50' : 'bg-amber-50 text-amber-900'}`}>
         <Helmet>
           <title>{book.title} | INKWELL</title>
           {book.description && <meta name="description" content={book.description} />}
@@ -352,7 +356,12 @@ const BookReader = () => {
         <div className="max-w-5xl mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row items-start md:space-x-8">
             <div className="w-full md:w-1/3 mb-8 md:mb-0">
-              <div className={`aspect-[2/3] ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg shadow-xl flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-2xl`}>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className={`aspect-[2/3] ${darkMode ? 'bg-amber-800' : 'bg-amber-100'} rounded-sm shadow-lg flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-xl`}
+              >
                 {book.coverUrl ? (
                   <img 
                     src={book.coverUrl} 
@@ -361,34 +370,43 @@ const BookReader = () => {
                   />
                 ) : (
                   <div className="text-center p-4">
-                    <h2 className="text-xl font-bold">{book.title}</h2>
+                    <h2 className="text-xl font-serif font-bold">{book.title}</h2>
                     <p className="mt-2">{book.User.username}</p>
                   </div>
                 )}
-              </div>
+              </motion.div>
             </div>
             
             <div className="w-full md:w-2/3">
               <div className="flex justify-between items-start">
-                <button 
+                <motion.button 
+                  whileHover={{ x: -2 }}
                   onClick={() => navigate(-1)}
-                  className="flex items-center px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 mb-4 transition-colors"
+                  className={`flex items-center px-3 py-2 rounded-sm ${darkMode ? 'hover:bg-amber-800' : 'hover:bg-amber-200'} mb-4 transition-colors`}
                 >
                   <FiChevronLeft className="mr-1" /> Back
-                </button>
+                </motion.button>
                 
                 <div className="flex items-center space-x-2">
-                  <button 
+                  <motion.button 
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setDarkMode(!darkMode)}
-                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className={`p-2 rounded-full ${darkMode ? 'hover:bg-amber-800' : 'hover:bg-amber-200'} transition-colors`}
                     title={darkMode ? 'Light mode' : 'Dark mode'}
                   >
                     {darkMode ? <FiSun /> : <FiMoon />}
-                  </button>
+                  </motion.button>
                 </div>
               </div>
               
-              <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
+              <motion.h1 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="text-3xl font-serif font-bold mb-2"
+              >
+                {book.title}
+              </motion.h1>
               
               <div className="flex items-center space-x-2 mb-4">
                 {book.User.avatarUrl ? (
@@ -398,14 +416,14 @@ const BookReader = () => {
                     className="w-8 h-8 rounded-full"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-800 dark:text-primary-200 font-medium">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${darkMode ? 'bg-amber-700 text-amber-200' : 'bg-amber-200 text-amber-800'}`}>
                     {book.User.username.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <span>
                   by <Link 
                     to={`/user/${book.User.username}`} 
-                    className="hover:text-primary-600 dark:hover:text-primary-400 font-medium"
+                    className={`hover:underline font-medium ${darkMode ? 'text-amber-300 hover:text-amber-200' : 'text-amber-700 hover:text-amber-800'}`}
                   >
                     {book.User.username}
                   </Link>
@@ -413,56 +431,66 @@ const BookReader = () => {
               </div>
               
               {book.description && (
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold mb-2">Description</h2>
-                  <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{book.description}</p>
-                </div>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="mb-6"
+                >
+                  <h2 className="text-lg font-serif font-semibold mb-2">Description</h2>
+                  <p className={`${darkMode ? 'text-amber-200' : 'text-amber-700'}`}>{book.description}</p>
+                </motion.div>
               )}
               
               <div className="mb-6">
                 <div className="flex flex-wrap gap-2 mt-2">
                   {book.genre.map((g, i) => (
-                    <span 
-                      key={i} 
-                      className={`px-3 py-1 text-sm rounded-full ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-800'}`}
+                    <motion.span 
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.1 + (i * 0.05) }}
+                      className={`px-3 py-1 text-sm rounded-sm ${darkMode ? 'bg-amber-800 text-amber-200' : 'bg-amber-200 text-amber-800'}`}
                     >
                       {g}
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
                 
                 {book.tags.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Tags: {book.tags.join(', ')}</p>
+                    <p className={`text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>Tags: {book.tags.join(', ')}</p>
                   </div>
                 )}
               </div>
               
               <div className="mb-6">
                 <div className="flex items-center space-x-4">
-                  <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Words</span>
+                  <div className={`px-4 py-2 rounded-sm ${darkMode ? 'bg-amber-800' : 'bg-amber-100'}`}>
+                    <span className={`text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>Words</span>
                     <p className="font-semibold">{totalWordCount.toLocaleString()}</p>
                   </div>
                   
-                  <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Pages</span>
+                  <div className={`px-4 py-2 rounded-sm ${darkMode ? 'bg-amber-800' : 'bg-amber-100'}`}>
+                    <span className={`text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>Pages</span>
                     <p className="font-semibold">{book.pages?.length || 0}</p>
                   </div>
                   
-                  <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Published</span>
+                  <div className={`px-4 py-2 rounded-sm ${darkMode ? 'bg-amber-800' : 'bg-amber-100'}`}>
+                    <span className={`text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>Published</span>
                     <p className="font-semibold">{new Date(book.publishedAt).toLocaleDateString()}</p>
                   </div>
                 </div>
               </div>
               
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={startReading}
-                className="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg font-medium flex items-center"
+                className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-sm shadow-md transition-all duration-300 hover:shadow-lg font-medium flex items-center"
               >
                 Start Reading <FiBookOpen className="ml-2" />
-              </button>
+              </motion.button>
             </div>
           </div>
           
@@ -482,7 +510,7 @@ const BookReader = () => {
 
   return (
     <div 
-      className={`min-h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`} 
+      className={`min-h-screen ${darkMode ? 'bg-amber-900 text-amber-50' : 'bg-amber-50 text-amber-900'}`} 
       ref={readerRef}
     >
       <Helmet>
@@ -491,81 +519,102 @@ const BookReader = () => {
       </Helmet>
 
       {/* Reading Header */}
-      <div className={`sticky top-0 z-20 ${darkMode ? 'bg-gray-800' : 'bg-white'} p-4 flex justify-between items-center shadow-md transition-all duration-300 ${isFullscreen ? 'opacity-0 hover:opacity-100' : ''}`}>
-        <button 
+      <motion.div 
+        initial={{ y: -20 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.3 }}
+        className={`sticky top-0 z-20 ${darkMode ? 'bg-amber-800' : 'bg-white'} p-4 flex justify-between items-center shadow-sm transition-all duration-300 ${isFullscreen ? 'opacity-0 hover:opacity-100' : ''}`}
+      >
+        <motion.button 
+          whileHover={{ x: -2 }}
           onClick={() => setReadingStarted(false)}
-          className="flex items-center px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          className={`flex items-center px-3 py-1 rounded-sm ${darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'} transition-colors`}
         >
           <FiChevronLeft className="mr-1" /> Contents
-        </button>
+        </motion.button>
         
         <div className="flex-1 px-4">
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div className={`w-full ${darkMode ? 'bg-amber-700' : 'bg-amber-100'} rounded-sm h-2`}>
             <div 
-              className="bg-primary-500 h-2 rounded-full transition-all duration-300" 
+              className="bg-amber-600 h-2 rounded-sm transition-all duration-300" 
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <div className="text-xs text-center text-gray-500 dark:text-gray-400 mt-1">
+          <div className={`text-xs text-center ${darkMode ? 'text-amber-400' : 'text-amber-600'} mt-1`}>
             Pages {currentPage + 1}-{Math.min(currentPage + 2, book.pages.length)} of {book.pages.length} ({progress}%)
           </div>
         </div>
         
         <div className="flex items-center space-x-2">
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className={`p-2 rounded-full ${darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'} transition-colors`}
             title="Settings"
           >
             <FiSettings />
-          </button>
+          </motion.button>
           
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={toggleBookmark}
             className={`p-2 rounded-full transition-colors ${isBookmarked() 
-              ? 'text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-900' 
-              : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+              ? 'text-amber-400 hover:bg-amber-800' 
+              : darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'}`}
             title={isBookmarked() ? 'Remove bookmark' : 'Add bookmark'}
           >
-            <FiBookmark className={isBookmarked() ? 'fill-current' : ''} />
-          </button>
+            <BookmarkIcon className={`h-5 w-5 ${isBookmarked() ? 'fill-current' : ''}`} />
+          </motion.button>
           
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setShowChapters(!showChapters)}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className={`p-2 rounded-full ${darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'} transition-colors`}
             title="Table of Contents"
           >
             <FiList />
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className={`fixed top-16 right-4 z-30 ${darkMode ? 'bg-gray-800' : 'bg-white'} p-4 rounded-lg shadow-xl border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className={`fixed top-16 right-4 z-30 ${darkMode ? 'bg-amber-800' : 'bg-white'} p-4 rounded-sm shadow-lg border ${darkMode ? 'border-amber-700' : 'border-amber-200'}`}
+        >
           <div className="flex justify-between items-center mb-3">
             <h3 className="font-medium">Reading Settings</h3>
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => setShowSettings(false)}
-              className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className={`p-1 rounded-full ${darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'} transition-colors`}
             >
               <FiX />
-            </button>
+            </motion.button>
           </div>
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium mb-2">Text Size</h3>
               <div className="flex gap-2">
                 {['small', 'medium', 'large', 'xlarge'].map((size) => (
-                  <button
+                  <motion.button
                     key={size}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setFontSize(size)}
-                    className={`px-3 py-1 rounded ${fontSize === size ? 
-                      (darkMode ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-800') : 
-                      (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700')}`}
+                    className={`px-3 py-1 rounded-sm ${fontSize === size ? 
+                      (darkMode ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-800') : 
+                      (darkMode ? 'bg-amber-700 text-amber-200' : 'bg-amber-50 text-amber-700')}`}
                   >
                     {size.charAt(0).toUpperCase() + size.slice(1)}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -574,15 +623,17 @@ const BookReader = () => {
               <h3 className="text-sm font-medium mb-2">Font Family</h3>
               <div className="flex gap-2">
                 {['serif', 'sans', 'mono'].map((family) => (
-                  <button
+                  <motion.button
                     key={family}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setFontFamily(family)}
-                    className={`px-3 py-1 rounded ${fontFamily === family ? 
-                      (darkMode ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-800') : 
-                      (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700')}`}
+                    className={`px-3 py-1 rounded-sm ${fontFamily === family ? 
+                      (darkMode ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-800') : 
+                      (darkMode ? 'bg-amber-700 text-amber-200' : 'bg-amber-50 text-amber-700')}`}
                   >
                     {family.charAt(0).toUpperCase() + family.slice(1)}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -591,52 +642,73 @@ const BookReader = () => {
               <h3 className="text-sm font-medium mb-2">Line Height</h3>
               <div className="flex gap-2">
                 {['tight', 'normal', 'relaxed', 'loose'].map((height) => (
-                  <button
+                  <motion.button
                     key={height}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setLineHeight(height)}
-                    className={`px-3 py-1 rounded ${lineHeight === height ? 
-                      (darkMode ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-800') : 
-                      (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700')}`}
+                    className={`px-3 py-1 rounded-sm ${lineHeight === height ? 
+                      (darkMode ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-800') : 
+                      (darkMode ? 'bg-amber-700 text-amber-200' : 'bg-amber-50 text-amber-700')}`}
                   >
                     {height.charAt(0).toUpperCase() + height.slice(1)}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
             
             <div className="flex items-center">
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className={`p-2 rounded-full ${darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'} transition-colors`}
                 title={darkMode ? 'Light mode' : 'Dark mode'}
               >
                 {darkMode ? <FiSun /> : <FiMoon />}
-              </button>
+              </motion.button>
               <span className="ml-2 text-sm">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
             </div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={toggleFullscreen}
-              className="w-full py-2 px-3 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
+              className={`w-full py-2 px-3 rounded-sm ${darkMode ? 'bg-amber-700 hover:bg-amber-600' : 'bg-amber-100 hover:bg-amber-200'} transition-colors text-sm flex items-center justify-center`}
             >
-              {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-            </button>
+              {isFullscreen ? (
+                <>
+                  <FiMinimize className="mr-2" /> Exit Fullscreen
+                </>
+              ) : (
+                <>
+                  <FiMaximize className="mr-2" /> Enter Fullscreen
+                </>
+              )}
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Chapter Navigation */}
       {showChapters && (
-        <div className={`fixed inset-0 z-30 ${darkMode ? 'bg-gray-900' : 'bg-white'} p-8 overflow-y-auto`}>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className={`fixed inset-0 z-30 ${darkMode ? 'bg-amber-900' : 'bg-white'} p-8 overflow-y-auto`}
+        >
           <div className="max-w-2xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Table of Contents</h2>
-              <button 
+              <h2 className="text-xl font-serif font-bold">Table of Contents</h2>
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setShowChapters(false)}
-                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className={`p-2 rounded-full ${darkMode ? 'hover:bg-amber-800' : 'hover:bg-amber-100'} transition-colors`}
               >
                 <FiX />
-              </button>
+              </motion.button>
             </div>
             <BookTableOfContents 
               bookContent={book.content} 
@@ -647,7 +719,7 @@ const BookReader = () => {
               bookmarks={bookmarks}
             />
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Main Reading Area */}
@@ -655,86 +727,101 @@ const BookReader = () => {
         <div className={`${fontSizeClasses[fontSize]} ${fontFamilyClasses[fontFamily]} ${lineHeightClasses[lineHeight]} leading-relaxed`}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Left Page */}
-            <div 
-              className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl`}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`${darkMode ? 'bg-amber-800' : 'bg-white'} p-8 rounded-sm shadow-md transition-all duration-300 hover:shadow-lg`}
               onClick={() => currentPage >= 2 && handlePrevious()}
             >
               {currentPage < book.pages.length && (
                 <>
                   <div 
                     ref={el => pageRefs.current[currentPage] = el}
-                    className="prose dark:prose-invert prose-p:my-4 max-w-none min-h-[60vh]"
+                    className={`prose ${darkMode ? 'prose-invert' : ''} prose-p:my-4 max-w-none min-h-[60vh]`}
                     dangerouslySetInnerHTML={{ __html: book.pages[currentPage] }}
                   />
-                  <div className="mt-4 text-sm text-gray-500 dark:text-gray-400 flex justify-between items-center">
+                  <div className={`mt-4 text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'} flex justify-between items-center`}>
                     <span>Page {currentPage + 1}</span>
                     <div className="flex items-center">
                       <span className="mr-2">{pageWordCounts[currentPage] || 0} words</span>
                       {isBookmarked() && (
-                        <FiBookmark className="text-yellow-500" />
+                        <BookmarkIcon className="h-4 w-4 text-amber-400" />
                       )}
                     </div>
                   </div>
                 </>
               )}
-            </div>
+            </motion.div>
             
             {/* Right Page */}
-            <div 
-              className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl`}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`${darkMode ? 'bg-amber-800' : 'bg-white'} p-8 rounded-sm shadow-md transition-all duration-300 hover:shadow-lg`}
               onClick={() => currentPage + 2 < book.pages.length && handleNext()}
             >
               {currentPage + 1 < book.pages.length && (
                 <>
                   <div 
                     ref={el => pageRefs.current[currentPage + 1] = el}
-                    className="prose dark:prose-invert max-w-none min-h-[60vh]"
+                    className={`prose ${darkMode ? 'prose-invert' : ''} max-w-none min-h-[60vh]`}
                     dangerouslySetInnerHTML={{ __html: book.pages[currentPage + 1] }}
                   />
-                  <div className="mt-4 text-sm text-gray-500 dark:text-gray-400 flex justify-between items-center">
+                  <div className={`mt-4 text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'} flex justify-between items-center`}>
                     <span>Page {currentPage + 2}</span>
                     <div className="flex items-center">
                       <span className="mr-2">{pageWordCounts[currentPage + 1] || 0} words</span>
                       {isBookmarked() && (
-                        <FiBookmark className="text-yellow-500" />
+                        <BookmarkIcon className="h-4 w-4 text-amber-400" />
                       )}
                     </div>
                   </div>
                 </>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
 
       {/* Navigation Footer */}
-      <div className={`fixed bottom-0 left-0 right-0 z-20 ${darkMode ? 'bg-gray-800' : 'bg-white'} p-4 shadow-lg transition-all duration-300 ${isFullscreen ? 'opacity-0 hover:opacity-100' : ''}`}>
+      <motion.div 
+        initial={{ y: 20 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.3 }}
+        className={`fixed bottom-0 left-0 right-0 z-20 ${darkMode ? 'bg-amber-800' : 'bg-white'} p-4 shadow-lg transition-all duration-300 ${isFullscreen ? 'opacity-0 hover:opacity-100' : ''}`}
+      >
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <button
+          <motion.button
+            whileHover={{ x: -2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handlePrevious}
             disabled={currentPage === 0}
-            className={`flex items-center px-4 py-2 rounded-lg ${currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'} transition-colors`}
+            className={`flex items-center px-4 py-2 rounded-sm ${currentPage === 0 ? 'opacity-50 cursor-not-allowed' : darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'} transition-colors`}
           >
             <FiChevronLeft className="mr-1" /> Previous
-          </button>
+          </motion.button>
           
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">
+          <div className={`text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'} text-center`}>
             <span>Pages {currentPage + 1}-{Math.min(currentPage + 2, book.pages.length)} of {book.pages.length}</span>
           </div>
           
-          <button
+          <motion.button
+            whileHover={{ x: 2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleNext}
             disabled={currentPage + 2 >= book.pages.length}
-            className={`flex items-center px-4 py-2 rounded-lg ${currentPage + 2 >= book.pages.length ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'} transition-colors`}
+            className={`flex items-center px-4 py-2 rounded-sm ${currentPage + 2 >= book.pages.length ? 'opacity-50 cursor-not-allowed' : darkMode ? 'hover:bg-amber-700' : 'hover:bg-amber-100'} transition-colors`}
           >
             Next <FiChevronRight className="ml-1" />
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Book Metadata Footer */}
       {!isFullscreen && (
-        <div className={`mt-12 py-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+        <div className={`mt-12 py-8 ${darkMode ? 'bg-amber-800' : 'bg-amber-100'}`}>
           <div className="max-w-4xl mx-auto px-4 sm:px-8">
             <div className="flex items-center space-x-4 mb-4">
               {book.User.avatarUrl ? (
@@ -744,20 +831,20 @@ const BookReader = () => {
                   className="w-12 h-12 rounded-full"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-800 dark:text-primary-200 font-medium">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-medium ${darkMode ? 'bg-amber-700 text-amber-200' : 'bg-amber-200 text-amber-800'}`}>
                   {book.User.username.charAt(0).toUpperCase()}
                 </div>
               )}
               <div>
-                <h3 className="font-medium">
+                <h3 className="font-serif font-medium">
                   <Link 
                     to={`/user/${book.User.username}`} 
-                    className="hover:text-primary-600 dark:hover:text-primary-400"
+                    className={`hover:underline ${darkMode ? 'text-amber-300 hover:text-amber-200' : 'text-amber-700 hover:text-amber-800'}`}
                   >
                     {book.User.username}
                   </Link>
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className={`text-sm ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
                   Published on {new Date(book.publishedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -767,7 +854,7 @@ const BookReader = () => {
               {book.genre.map((g, i) => (
                 <span 
                   key={i} 
-                  className={`px-3 py-1 text-sm rounded-full ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-800'}`}
+                  className={`px-3 py-1 text-sm rounded-sm ${darkMode ? 'bg-amber-700 text-amber-200' : 'bg-amber-200 text-amber-800'}`}
                 >
                   {g}
                 </span>

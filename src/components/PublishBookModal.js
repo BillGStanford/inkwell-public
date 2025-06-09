@@ -37,12 +37,12 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
     synopsis: bookDetails.synopsis || '',
     genre: bookDetails.genre || [],
     tags: bookDetails.tags || [],
-    coverImage: bookDetails.coverImage || '',
     language: bookDetails.language || 'English',
     license: bookDetails.license || 'All rights reserved',
     isMonetized: bookDetails.isMonetized || false,
     price: bookDetails.price || 0
   });
+  const [inputTag, setInputTag] = useState('');
 
   const genres = [
     'Fiction', 'Non-Fiction', 'Fantasy', 'Science Fiction', 'Mystery', 
@@ -50,7 +50,6 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
     'Self-Help', 'Poetry', 'Drama', 'Comedy', 'Adventure', 'Investigative'
   ];
 
-  // Check for banned title phrases
   const hasBannedTitle = (title) => {
     const lowerTitle = title.toLowerCase();
     return BANNED_TITLE_PHRASES.some(phrase => 
@@ -58,7 +57,6 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
     );
   };
 
-  // Calculate book length and check publishing limits
   useEffect(() => {
     const fetchPublishLimit = async () => {
       try {
@@ -108,31 +106,47 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
     });
   };
 
+  const handleTagKeyDown = (e) => {
+    if (['Enter', ','].includes(e.key)) {
+      e.preventDefault();
+      const newTag = inputTag.trim();
+      if (newTag && !publishData.tags.includes(newTag)) {
+        setPublishData(prev => ({
+          ...prev,
+          tags: [...prev.tags, newTag]
+        }));
+        setInputTag('');
+      }
+    }
+  };
+
   const handleTagChange = (e) => {
-    const tags = e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag);
-    setPublishData(prev => ({ ...prev, tags }));
+    setInputTag(e.target.value);
+  };
+
+  const removeTag = (tagToRemove) => {
+    setPublishData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
   };
 
   const handlePublish = async () => {
-    // Validate title
     if (hasBannedTitle(bookDetails.title)) {
       setError('Your title contains phrases that are not allowed. Please choose a different title.');
       return;
     }
 
-    // Validate length
     if (bookLengthInfo.charCount < MIN_CHARACTER_COUNT) {
       setError(`Your book must be at least ${MIN_CHARACTER_COUNT} characters long to be published.`);
       return;
     }
 
-    // Validate genre
     if (publishData.genre.length === 0) {
       setError('Please select at least one genre');
       return;
     }
 
-    // Validate publish limit
     if (publishLimit.remaining <= 0) {
       setError(`You can only publish ${MAX_BOOKS_PER_DAY} books per 24 hours. Please try again later.`);
       return;
@@ -181,7 +195,6 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
         </div>
         
         <div className="p-6 space-y-6">
-          {/* Publishing limits warning */}
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -207,7 +220,6 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
             </div>
           )}
           
-          {/* Book Information Preview */}
           <div className="bg-gray-50 p-4 rounded-md mb-6">
             <div className="flex justify-between items-start">
               <div>
@@ -215,7 +227,6 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
                 <p className="text-gray-600">{bookDetails.description}</p>
               </div>
               
-              {/* Book Length Badge */}
               <div className={`flex items-center px-3 py-2 rounded-md border ${getLengthBadgeClasses()}`}>
                 <Info className="w-4 h-4 mr-2" />
                 <div>
@@ -229,49 +240,7 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column */}
             <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image</label>
-                <div className="flex items-center space-x-4">
-                  {publishData.coverImage ? (
-                    <div className="relative w-32 h-48 bg-gray-100 rounded-md overflow-hidden">
-                      <img 
-                        src={publishData.coverImage} 
-                        alt="Book Cover" 
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        onClick={() => setPublishData(prev => ({ ...prev, coverImage: '' }))}
-                        className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md text-gray-600 hover:text-red-500"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-32 h-48 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 border border-dashed border-gray-300">
-                      No cover
-                    </div>
-                  )}
-                  
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          setPublishData(prev => ({ ...prev, coverImage: event.target.result }));
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                    className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle (optional)</label>
                 <input
@@ -297,7 +266,6 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
               </div>
             </div>
             
-            {/* Right Column */}
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Genre *</label>
@@ -321,13 +289,31 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {publishData.tags.map(tag => (
+                    <span 
+                      key={tag} 
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      {tag}
+                      <button 
+                        type="button" 
+                        onClick={() => removeTag(tag)}
+                        className="ml-1.5 inline-flex text-blue-400 hover:text-blue-600 focus:outline-none"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
                 <input
                   type="text"
-                  value={publishData.tags.join(', ')}
+                  value={inputTag}
                   onChange={handleTagChange}
+                  onKeyDown={handleTagKeyDown}
                   className="w-full border border-gray-300 rounded-md p-2"
-                  placeholder="e.g., romance, time travel, LGBTQ+, dark fantasy"
+                  placeholder="Type tag and press comma or enter"
                 />
                 <p className="text-xs text-gray-500 mt-1">Tags help readers discover your book</p>
               </div>
@@ -403,7 +389,6 @@ const PublishBookModal = ({ bookId, bookDetails, onClose, onSuccess }) => {
             </div>
           </div>
           
-          {/* Book Length Information Panel */}
           <div className={`p-4 rounded-md border ${getLengthBadgeClasses()}`}>
             <h4 className="font-medium flex items-center">
               <Info className="w-4 h-4 mr-2" />

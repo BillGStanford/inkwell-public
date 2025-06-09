@@ -183,3 +183,64 @@ table th {
 .resize-handle.active {
   opacity: 1;
 }
+
+/* Add to your CSS */
+.ProseMirror {
+  min-height: 600px;
+  padding: 1rem;
+  font-family: 'Merriweather', serif;
+  line-height: 1.8;
+  color: #3c2a10;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror p {
+  margin-bottom: 1.2em;
+}
+
+.ProseMirror h1, 
+.ProseMirror h2, 
+.ProseMirror h3 {
+  color: #78350f;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+}
+
+.ProseMirror ul, 
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.2em;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #f59e0b;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: #5a4a30;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.25rem;
+  margin: 1em 0;
+}
+
+.ProseMirror a {
+  color: #b45309;
+  text-decoration: underline;
+}
+
+.ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  color: #d6d3d1;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

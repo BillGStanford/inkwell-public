@@ -469,33 +469,52 @@ const BookEditor = () => {
         )}
 
         {/* Text editor */}
-        <div className={`prose prose-amber prose-lg max-w-none mt-6 ${fullscreen ? 'max-w-3xl mx-auto' : ''}`}>
-          <EditorContent 
-            editor={editor} 
-            className={`min-h-[600px] outline-none bg-white p-6 rounded-sm shadow-md border border-amber-100 ${
-              fullscreen ? 'min-h-[calc(100vh-200px)]' : ''
-            }`} 
-          />
-          
-          {/* Word count */}
-          <div className="mt-4 text-sm text-amber-600 flex justify-between items-center">
-            <div>
-              <span className="font-medium">{wordCount}</span> words | <span className="font-medium">{characterCount}</span> characters
-              {limit && (
-                <span> | {Math.max(0, limit - characterCount)} characters remaining</span>
-              )}
-            </div>
-            
-            {fullscreen && (
-              <button
-                onClick={toggleFullscreen}
-                className="text-amber-700 hover:text-amber-900 transition-colors"
-              >
-                Exit Fullscreen
-              </button>
-            )}
-          </div>
-        </div>
+<div className={`mt-6 ${fullscreen ? 'max-w-3xl mx-auto' : ''}`}>
+  <div 
+    className={`min-h-[600px] outline-none bg-white p-6 rounded-sm shadow-md border border-amber-100 ${
+      fullscreen ? 'min-h-[calc(100vh-200px)]' : ''
+    }`}
+  >
+    <EditorContent 
+      editor={editor}
+      className="prose prose-amber prose-lg max-w-none focus:outline-none"
+      style={{
+        fontFamily: "'Merriweather', serif",
+        lineHeight: 1.8,
+        fontSize: '1.125rem',
+      }}
+    />
+    
+    {/* Enhanced writing area indicators */}
+    {editor?.isEmpty && (
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+        <PencilSquareIcon className="h-12 w-12 mx-auto text-amber-200 mb-4" />
+        <p className="text-amber-300 text-xl font-serif">Begin your story here...</p>
+        <p className="text-amber-200 mt-2">Type or paste your text</p>
+      </div>
+    )}
+  </div>
+  
+  {/* Word count */}
+  <div className="mt-4 text-sm text-amber-600 flex justify-between items-center">
+    <div>
+      <span className="font-medium">{wordCount}</span> words | 
+      <span className="font-medium"> {characterCount}</span> characters
+      {limit && (
+        <span> | {Math.max(0, limit - characterCount)} characters remaining</span>
+      )}
+    </div>
+    
+    {fullscreen && (
+      <button
+        onClick={toggleFullscreen}
+        className="text-amber-700 hover:text-amber-900 transition-colors"
+      >
+        Exit Fullscreen
+      </button>
+    )}
+  </div>
+</div>
       </motion.div>
 
       {/* Fullscreen exit button (fixed position) */}
