@@ -90,6 +90,16 @@ const Navbar = () => {
               >
                 Write
               </Link>
+              <a
+  href="https://forms.gle/HAd7azCKH9mFyPGt8"
+  target="_blank"
+  rel="noopener noreferrer"
+  className={`border-transparent text-amber-200 hover:text-white hover:border-amber-300 
+              inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors`}
+>
+  Feedback
+</a>
+
             </div>
           </div>
           
