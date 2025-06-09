@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://tender-emu-2.loca.lt/';
 
 // Create an axios instance with default config
 const api = axios.create({
