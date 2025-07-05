@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -10,14 +9,14 @@ import {
   ClockIcon,
   FunnelIcon,
   XMarkIcon,
-  UserIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
+import bookData from '../data/bookdata';
 
 const Discovery = () => {
   const { user } = useAuth();
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     genre: '',
@@ -29,64 +28,34 @@ const Discovery = () => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [bookmarkedBooks, setBookmarkedBooks] = useState([]);
 
+  // Initialize books data
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const params = {};
-        if (filters.genre) params.genre = filters.genre;
-        if (filters.search) params.search = filters.search;
-        if (filters.length) params.length = filters.length;
+    setLoading(true);
+    try {
+      const processedBooks = bookData.map(book => {
+        const wordCount = book.wordCount || getWordCount(book.content);
+        const charCount = book.charCount || getCharacterCount(book.content);
+        const isLongBook = wordCount > 40000 || charCount > 200000;
         
-        const response = await axios.get('http://localhost:5000/api/books/discover', { 
-          params
-        });
-        
-        // Add book length categorization to each book
-        const booksWithLengthCategory = response.data.map(book => {
-          const wordCount = getWordCount(book.content);
-          const charCount = getCharacterCount(book.content);
-          
-          const isLongBook = wordCount > 40000 || charCount > 200000;
-          
-          return {
-            ...book,
-            wordCount,
-            charCount,
-            bookLength: isLongBook ? 'long' : 'short'
-          };
-        });
-        
-        setBooks(booksWithLengthCategory);
-      } catch (err) {
-        console.error('Error fetching books:', err);
-        setError(err.response?.data?.message || 'Failed to fetch books');
-      } finally {
-        setLoading(false);
-      }
-    };
+        return {
+          ...book,
+          wordCount,
+          charCount,
+          bookLength: isLongBook ? 'long' : 'short'
+        };
+      });
+      
+      setBooks(processedBooks);
+      setDisplayedBooks(processedBooks);
+    } catch (err) {
+      console.error('Error processing books:', err);
+      setError('Failed to load books');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const fetchBookmarks = async () => {
-      if (user) {
-        try {
-          const response = await axios.get('http://localhost:5000/api/bookmarks', {
-            headers: {
-              Authorization: `Bearer ${user.token}`
-            }
-          });
-          setBookmarkedBooks(response.data
-            .filter(b => b.type === 'book')
-            .map(b => b.bookId));
-        } catch (err) {
-          console.error('Error fetching bookmarks:', err);
-        }
-      }
-    };
-
-    fetchBooks();
-    fetchBookmarks();
-  }, [filters.genre, filters.search, filters.length, user]);
-
-  // Helper function to calculate word count
+  // Helper functions
   const getWordCount = (content) => {
     if (!content) return 0;
     const tempDiv = document.createElement('div');
@@ -95,7 +64,6 @@ const Discovery = () => {
     return text.trim() ? text.split(/\s+/).length : 0;
   };
 
-  // Helper function to calculate character count
   const getCharacterCount = (content) => {
     if (!content) return 0;
     const tempDiv = document.createElement('div');
@@ -104,13 +72,12 @@ const Discovery = () => {
     return text.length;
   };
 
+  // Filter and sort books
   useEffect(() => {
     let results = [...books];
     
-    // Apply search filter
     if (filters.search) {
       const searchTerms = filters.search.toLowerCase().split(' ').filter(term => term.length > 0);
-      
       results = results.filter(book => {
         return searchTerms.some(term => 
           book.title.toLowerCase().includes(term) ||
@@ -122,12 +89,14 @@ const Discovery = () => {
       });
     }
     
-    // Apply length filter
+    if (filters.genre) {
+      results = results.filter(book => book.genre.includes(filters.genre));
+    }
+    
     if (filters.length) {
       results = results.filter(book => book.bookLength === filters.length);
     }
     
-    // Apply sorting
     switch(filters.sort) {
       case 'price-asc':
         results.sort((a, b) => (a.price || 0) - (b.price || 0));
@@ -142,7 +111,6 @@ const Discovery = () => {
         results.sort((a, b) => b.title.localeCompare(a.title));
         break;
       case 'random':
-        // Fisher-Yates shuffle algorithm for randomization
         for (let i = results.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [results[i], results[j]] = [results[j], results[i]];
@@ -150,13 +118,10 @@ const Discovery = () => {
         break;
       case 'newest':
       default:
-        // Default sorting - prioritize long books at the top
         if (!filters.length) {
           results.sort((a, b) => {
-            // First sort by book length (long books first)
             if (a.bookLength === 'long' && b.bookLength !== 'long') return -1;
             if (a.bookLength !== 'long' && b.bookLength === 'long') return 1;
-            // Then sort by date (newest first) for books of the same length
             return new Date(b.createdAt) - new Date(a.createdAt);
           });
         }
@@ -165,15 +130,19 @@ const Discovery = () => {
     
     setDisplayedBooks(results);
     
-    // Update active filters
     const newActiveFilters = [];
     if (filters.genre) newActiveFilters.push({ type: 'genre', value: filters.genre });
     if (filters.search) newActiveFilters.push({ type: 'search', value: filters.search });
     if (filters.length) newActiveFilters.push({ type: 'length', value: filters.length === 'long' ? 'Long Books' : 'Short Books' });
     setActiveFilters(newActiveFilters);
-    
   }, [books, filters]);
 
+  // Simple PDF opener
+  const openPdf = (pdfUrl) => {
+    window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  // UI handlers
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
@@ -196,43 +165,16 @@ const Discovery = () => {
     setFilters(prev => ({ ...prev, sort: 'random' }));
   };
 
-  const toggleBookmark = async (bookId) => {
+  const toggleBookmark = (bookId) => {
     if (!user) {
       window.location.href = '/login';
       return;
     }
     
-    try {
-      if (bookmarkedBooks.includes(bookId)) {
-        const response = await axios.get('http://localhost:5000/api/bookmarks', {
-          headers: {
-            Authorization: `Bearer ${user.token}`
-          }
-        });
-        
-        const bookmark = response.data.find(b => b.bookId === bookId && b.type === 'book');
-        
-        if (bookmark) {
-          await axios.delete(`http://localhost:5000/api/bookmarks/${bookmark.id}`, {
-            headers: {
-              Authorization: `Bearer ${user.token}`
-            }
-          });
-          setBookmarkedBooks(bookmarkedBooks.filter(id => id !== bookId));
-        }
-      } else {
-        await axios.post('http://localhost:5000/api/bookmarks', { 
-          bookId,
-          type: 'book'
-        }, {
-          headers: {
-            Authorization: `Bearer ${user.token}`
-          }
-        });
-        setBookmarkedBooks([...bookmarkedBooks, bookId]);
-      }
-    } catch (err) {
-      console.error('Error toggling bookmark:', err);
+    if (bookmarkedBooks.includes(bookId)) {
+      setBookmarkedBooks(bookmarkedBooks.filter(id => id !== bookId));
+    } else {
+      setBookmarkedBooks([...bookmarkedBooks, bookId]);
     }
   };
 
@@ -533,13 +475,13 @@ const Discovery = () => {
                         <div className="text-xs text-amber-500">
                           {book.wordCount.toLocaleString()} words
                         </div>
-                        <Link 
-                          to={`/book/${book.id}`}
+                        <button
+                          onClick={() => openPdf(book.pdfUrl)}
                           className="inline-flex items-center text-sm font-medium text-amber-700 hover:text-amber-900 group transition-colors"
                         >
-                          Read this story
+                          Read Now
                           <ArrowRightIcon className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   </div>

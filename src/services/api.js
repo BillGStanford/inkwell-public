@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_URL = 'https://chubby-jobs-strive.loca.lt';
+const API_URL = 'http://localhost:5000'; // or whatever PORT your backend uses
 
 // Create an axios instance with default config
 const api = axios.create({
